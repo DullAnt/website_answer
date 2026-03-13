@@ -21,7 +21,6 @@ DEFAULT_DEVICE = os.getenv("DEVICE", "cuda")
 # -------------------Travily---------------------
 DEFAULT_TAVILY_API_KEY = os.getenv("TAVILY_API_KEY", "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")
 
-
 #----------------Embendings------------------
 DEFAULT_EMBEDDING_MODEL = os.getenv("EMBEDDING_MODEL", "intfloat/multilingual-e5-base")
 
