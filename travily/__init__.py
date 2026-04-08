@@ -1,6 +1,7 @@
-from .travily import search, extract
+from .travily import search, extract, load_saved_pages
 
 __all__ = [
     "search",
-    "extract"
+    "extract",
+    "load_saved_pages",
 ]

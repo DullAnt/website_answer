@@ -1,0 +1,7 @@
+tavily-python
+langchain-huggingface
+langchain-community 
+faiss-cpu
+sentence-transformers
+langchain-community
+langchain-ollama

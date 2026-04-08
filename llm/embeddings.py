@@ -2,26 +2,22 @@ import os
 import faiss
 import hashlib
 from uuid import uuid4
+
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_community.vectorstores import FAISS
 from langchain_community.docstore.in_memory import InMemoryDocstore
 from langchain_core.documents import Document
+
 from config.config import Config
 
 
 def _make_content_hash(url: str, content: str) -> str:
-    
-    # Хэш, чтобыт не добавлять в FAISS одни и те же чанки повторно.
-    
     raw = f"{url}\n{content}".encode("utf-8", errors="ignore")
     return hashlib.md5(raw).hexdigest()
 
 
 def _load_or_create_vectorstore(embeddings):
-    
-    # Загружаем FAISS, если он уже есть или создаем индекс
-    
     faiss_dir = Config.FAISS_DB_DIR
 
     if os.path.exists(faiss_dir):
@@ -30,7 +26,7 @@ def _load_or_create_vectorstore(embeddings):
             return FAISS.load_local(
                 folder_path=faiss_dir,
                 embeddings=embeddings,
-                allow_dangerous_deserialization=True
+                allow_dangerous_deserialization=True,
             )
         except Exception as e:
             print(f"Не удалось загрузить существующий FAISS: {e}")
@@ -47,9 +43,6 @@ def _load_or_create_vectorstore(embeddings):
 
 
 def _get_existing_hashes(vectorstore) -> set[str]:
-    """
-    Собираем content_hash из docstore, чтобы не было дубликотов в базе.
-    """
     existing_hashes = set()
 
     try:
@@ -126,24 +119,24 @@ def get_top_chunks(pages: list[dict], question: str) -> list[Document]:
 
     vectorstore = _load_or_create_vectorstore(embeddings)
 
-    # удаление дебликатов
     existing_hashes = _get_existing_hashes(vectorstore)
     docs_to_add = []
-
     seen_in_batch = set()
+
     for doc in docs:
-        h = doc.metadata.get("content_hash")
-        if not h:
+        content_hash = doc.metadata.get("content_hash")
+
+        if not content_hash:
             docs_to_add.append(doc)
             continue
 
-        if h in existing_hashes:
+        if content_hash in existing_hashes:
             continue
 
-        if h in seen_in_batch:
+        if content_hash in seen_in_batch:
             continue
 
-        seen_in_batch.add(h)
+        seen_in_batch.add(content_hash)
         docs_to_add.append(doc)
 
     print(f"Новых чанков для добавления: {len(docs_to_add)}")
@@ -152,12 +145,12 @@ def get_top_chunks(pages: list[dict], question: str) -> list[Document]:
         uuids = [str(uuid4()) for _ in range(len(docs_to_add))]
         vectorstore.add_documents(documents=docs_to_add, ids=uuids)
 
-        print("Сохранение в бд")
+        print("Сохранение в БД")
+        os.makedirs(Config.FAISS_DB_DIR, exist_ok=True)
         vectorstore.save_local(Config.FAISS_DB_DIR)
     else:
         print("Новых чанков нет, индекс не обновлялся.")
 
-    # 6. Для каждого текущего URL берём top-K чанков
     ordered_urls = []
     seen_urls = set()
 
@@ -169,7 +162,7 @@ def get_top_chunks(pages: list[dict], question: str) -> list[Document]:
 
     top_chunks = []
 
-    print(f"Ищем топ {Config.TOP_K} чанков ДЛЯ КАЖДОГО URL")
+    print(f"Ищем top {Config.TOP_K} чанков для каждого URL")
 
     for url in ordered_urls:
         try:

@@ -1,6 +1,0 @@
-pip install tavily-python
-pip install langchain-huggingface
-pip install -qU langchain-community faiss-cpu
-pip install sentence-transformers
-pip install -U langchain-community
-pip install langchain-ollama
