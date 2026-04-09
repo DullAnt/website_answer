@@ -1,3 +1,4 @@
+import re
 from collections import OrderedDict
 from langchain_ollama import ChatOllama
 from langchain_core.prompts import PromptTemplate
@@ -46,6 +47,27 @@ def _group_chunks_by_url(chunks: list) -> list[tuple[str, list]]:
 
     return list(grouped.items())
 
+def _extract_used_urls_from_answer(answer: str, chunks: list) -> list[str]:
+    if not answer:
+        return []
+
+    candidate_urls = []
+    seen = set()
+
+    for chunk in chunks:
+        url = chunk.metadata.get("url")
+        if url and url not in seen:
+            seen.add(url)
+            candidate_urls.append(url)
+
+    answer_lower = answer.lower()
+    used_urls = []
+
+    for url in candidate_urls:
+        if url.lower() in answer_lower:
+            used_urls.append(url)
+
+    return used_urls
 
 def _iter_batches(items: list, batch_size: int):
     batch_size = max(1, batch_size)
@@ -169,17 +191,11 @@ def generate_final_answer(question: str, chunks: list) -> str:
         else:
             accumulated_answer = _refine_answer(question, accumulated_answer, context_text)
 
-    unique_urls = []
-    seen = set()
-    for chunk in chunks:
-        url = chunk.metadata.get("url")
-        if url and url not in seen:
-            seen.add(url)
-            unique_urls.append(url)
+        used_urls = _extract_used_urls_from_answer(accumulated_answer, chunks)
 
-    if unique_urls:
-        accumulated_answer += "\n\nИспользованные источники:\n"
-        for u in unique_urls:
+        if used_urls:
+            accumulated_answer += "\n\nИспользованные источники:\n"
+        for u in used_urls:
             accumulated_answer += f"- {u}\n"
 
-    return accumulated_answer
+        return accumulated_answer, used_urls

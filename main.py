@@ -1,5 +1,5 @@
 from llm.ollama import generate_search_topics, generate_final_answer
-from travily.travily import search, extract
+from travily.travily import search, extract, save_used_pages
 from llm.embeddings import get_top_chunks
 from Tools import filter_urls, filter_pages, rerank_chunks
 
@@ -56,9 +56,9 @@ def main():
             print("Не удалось получить релевантные чанки.")
             continue
         
-        print(f"Чанков до rerank: {len(top_chunks)}")
+        print(f"Чанков до фильтрации: {len(top_chunks)}")
         top_chunks = rerank_chunks(top_chunks, question)
-        print(f"Чанков после rerank: {len(top_chunks)}")
+        print(f"Чанков после фильтрации: {len(top_chunks)}")
 
 
         print("\nСсылки, по которым собран текст:")
@@ -80,8 +80,16 @@ def main():
             if new_q:
                 question = new_q
 
-    final_answer = generate_final_answer(question, top_chunks)
+    final_answer, used_urls = generate_final_answer(question, top_chunks)
+
+    save_used_pages(pages, used_urls)
+
     print("\n" + final_answer)
+
+    if used_urls:
+        print("\nСсылки, реально использованные в ответе:")
+        for url in used_urls:
+            print(f" -> {url}")
 
 
 if __name__ == "__main__":
