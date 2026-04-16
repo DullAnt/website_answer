@@ -1,14 +1,19 @@
 from llm.ollama import generate_search_topics, generate_final_answer
-from travily.travily import search, extract, save_used_pages
 from llm.embeddings import get_top_chunks
 from Tools import filter_urls, filter_pages, rerank_chunks
+from travily.travily import extract, save_used_pages
+from search import get_search_engine
+
 
 def main():
     question = input("Введите ваш вопрос или 'q' для выхода: ").strip()
     if question.lower() == "q":
         return
 
+    search_engine = get_search_engine()
+
     print(f"\nВаш вопрос: {question}")
+    print(f"Текущий search engine: {search_engine.__class__.__name__}")
 
     while True:
         print("\nГенерация подтем")
@@ -18,20 +23,23 @@ def main():
         for i, topic in enumerate(topics, 1):
             print(f"{i}. {topic}")
 
-        approval = input("\nВы одобряете эти темы для поиска? (y - да, n - ввести свои): ").strip().lower()
+        approval = input(
+            "\nВы одобряете эти темы для поиска? (y - да, n - ввести свои): "
+        ).strip().lower()
+
         if approval != "y":
             custom_topics = input("Введите ваши темы через запятую: ").strip()
             topics = [t.strip() for t in custom_topics.split(",") if t.strip()]
 
-        print("\nИщем ссылки через Tavily")
-        urls = search(topics)
-        print(f"Найдено ссылок: {len(urls)}")
+        print("\nИщем ссылки")
+        urls = search_engine.search(topics)
+        print(f"Найдено ссылок до фильтрации: {len(urls)}")
 
         urls = filter_urls(urls)
         print(f"Осталось ссылок после filter_urls: {len(urls)}")
 
         if not urls:
-            print("Ссылки не найдены.")
+            print("После фильтрации полезных ссылок не осталось.")
             continue
 
         print("\nСкачиваем данные")
@@ -55,28 +63,24 @@ def main():
         if not top_chunks:
             print("Не удалось получить релевантные чанки.")
             continue
-        
-        print(f"Чанков до фильтрации: {len(top_chunks)}")
+
+        print(f"Чанков до rerank: {len(top_chunks)}")
         top_chunks = rerank_chunks(top_chunks, question)
-        print(f"Чанков после фильтрации: {len(top_chunks)}")
+        print(f"Чанков после rerank: {len(top_chunks)}")
 
-
-        print("\nСсылки, по которым собран текст:")
-        shown = set()
-        for page in pages:
-            url = page.get("url")
-            if url and url not in shown:
-                shown.add(url)
-                print(f" -> {url}")
-
-        proceed = input("\nОдобряете ли вы эти ссылки для генерации финального ответа? (y - продолжить, n - искать заново): ").strip().lower()
+        proceed = input(
+            "\nОдобряете ли вы эти данные для генерации финального ответа? "
+            "(y - продолжить, n - искать заново): "
+        ).strip().lower()
 
         if proceed == "y":
             print("\nНачинаем генерацию")
             break
         else:
             print("\nДавайте уточним запрос и попробуем найти другие источники.")
-            new_q = input(f"Можете уточнить вопрос (нажмите Enter, чтобы оставить '{question}'): ").strip()
+            new_q = input(
+                f"Можете уточнить вопрос (нажмите Enter, чтобы оставить '{question}'): "
+            ).strip()
             if new_q:
                 question = new_q
 

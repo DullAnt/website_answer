@@ -14,12 +14,23 @@ DEFAULT_OLLAMA_HOST = os.getenv("OLLAMA_HOST", "http://localhost:11434")
 DEFAULT_OLLAMA_TIMEOUT = int(os.getenv("OLLAMA_TIMEOUT", "600"))
 DEFAULT_OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "gemma3:2b")
 
-
 # -------------------Device---------------------
 DEFAULT_DEVICE = os.getenv("DEVICE", "cuda")
 
-# -------------------Travily---------------------
+# -------------------Search---------------------
 DEFAULT_TAVILY_API_KEY = os.getenv("TAVILY_API_KEY", "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")
+DEFAULT_SEARCH_ENGINE = os.getenv("SEARCH_ENGINE", "tavily")
+
+# ------------------ Search Engine ------------------
+DEFAULT_SEARCH_ENGINE = os.getenv("SEARCH_ENGINE", "tavily")
+
+# ------------------ SearXNG ------------------
+DEFAULT_SEARXNG_BASE_URL = os.getenv("SEARXNG_BASE_URL", "")
+DEFAULT_SEARXNG_SEARCH_PATH = os.getenv("SEARXNG_SEARCH_PATH", "/search")
+DEFAULT_SEARXNG_TIMEOUT = int(os.getenv("SEARXNG_TIMEOUT", "30"))
+DEFAULT_SEARXNG_CATEGORIES = os.getenv("SEARXNG_CATEGORIES", "general")
+DEFAULT_SEARXNG_LANGUAGE = os.getenv("SEARXNG_LANGUAGE", "auto")
+DEFAULT_SEARXNG_SAFESEARCH = int(os.getenv("SEARXNG_SAFESEARCH", "0"))
 
 #----------------Embendings------------------
 DEFAULT_EMBEDDING_MODEL = os.getenv("EMBEDDING_MODEL", "intfloat/multilingual-e5-base")
@@ -50,7 +61,17 @@ class Config:
 
     # Travily
     TRAVILY_API = DEFAULT_TAVILY_API_KEY
-    
+    # Search Engine
+    SEARCH_ENGINE = DEFAULT_SEARCH_ENGINE
+
+    # SearXNG
+    SEARXNG_BASE_URL = DEFAULT_SEARXNG_BASE_URL
+    SEARXNG_SEARCH_PATH = DEFAULT_SEARXNG_SEARCH_PATH
+    SEARXNG_TIMEOUT = DEFAULT_SEARXNG_TIMEOUT
+    SEARXNG_CATEGORIES = DEFAULT_SEARXNG_CATEGORIES
+    SEARXNG_LANGUAGE = DEFAULT_SEARXNG_LANGUAGE
+    SEARXNG_SAFESEARCH = DEFAULT_SEARXNG_SAFESEARCH
+        
     # RAG
     TOP_K = DEFAULT_TOP_K
     N_URLS_FOR_TOPIC = DEFAULT_N_URLS_FOR_TOPIC
@@ -82,5 +103,12 @@ __all__ = [
     "FAISS_DB_DIR",
     "DATA_DIR",
     "EXTRACTED_PAGES_DIR",
-    "EXTRACTED_LINKS_FILE",
+    "DEFAULT_SEARCH_ENGINE",
+    "DEFAULT_SEARXNG_BASE_URL",
+    "DEFAULT_SEARXNG_SEARCH_PATH",
+    "DEFAULT_SEARXNG_TIMEOUT",
+    "DEFAULT_SEARXNG_CATEGORIES",
+    "DEFAULT_SEARXNG_LANGUAGE",
+    "DEFAULT_SEARXNG_SAFESEARCH",
+    "EXTRACTED_LINKS_FILE"
 ]
