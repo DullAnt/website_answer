@@ -49,6 +49,7 @@ DATA_DIR = os.path.join(BASE_DIR, "data")
 EXTRACTED_PAGES_DIR = os.path.join(DATA_DIR, "extracted_pages")
 EXTRACTED_LINKS_FILE = os.path.join(EXTRACTED_PAGES_DIR, "extracted_links.jsonl")
 
+
 class Config:
 
     #Ollama    
