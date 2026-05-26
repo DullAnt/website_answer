@@ -163,28 +163,20 @@ def _refine_answer(question: str, previous_answer: str, context_text: str) -> st
     return str(response.content).strip()
 
 
-def generate_final_answer(question: str, chunks: list) -> tuple[str, list[str]]:
+def generate_final_answer(question: str, chunks: list):
     if not chunks:
-        return (
-            "К сожалению, я не нашел точного ответа на этот вопрос в найденных источниках.",
-            []
-        )
+        return "К сожалению, я не нашел точного ответа на этот вопрос в найденных источниках.", []
 
     grouped_by_url = _group_chunks_by_url(chunks)
 
     if not grouped_by_url:
-        return (
-            "К сожалению, я не нашел точного ответа на этот вопрос в найденных источниках.",
-            []
-        )
+        return "К сожалению, я не нашел точного ответа на этот вопрос в найденных источниках.", []
 
     batches = list(_iter_batches(grouped_by_url, Config.BATCH_URL))
-
     accumulated_answer = ""
 
     for batch_index, batch in enumerate(batches, start=1):
         batch_chunks = []
-
         for _, url_chunks in batch:
             batch_chunks.extend(url_chunks)
 
@@ -202,7 +194,7 @@ def generate_final_answer(question: str, chunks: list) -> tuple[str, list[str]]:
 
     if used_urls:
         accumulated_answer += "\n\nИспользованные источники:\n"
-        for url in used_urls:
-            accumulated_answer += f"- {url}\n"
+        for u in used_urls:
+            accumulated_answer += f"- {u}\n"
 
     return accumulated_answer, used_urls

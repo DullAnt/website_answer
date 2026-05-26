@@ -1,7 +1,5 @@
-from llm.ollama import generate_search_topics, generate_final_answer
-from llm.embeddings import get_top_chunks
+from llm import generate_search_topics, get_top_chunks, generate_final_answer
 from Tools import filter_urls, filter_pages, rerank_chunks
-from travily.travily import extract, save_used_pages
 from search import get_search_engine
 
 
@@ -42,19 +40,18 @@ def main():
             print("После фильтрации полезных ссылок не осталось.")
             continue
 
-        print("\nСкачиваем данные")
-        pages = extract(urls, question=question)
+        print("\nЛокально извлекаем страницы")
+        pages = filter_pages(
+            urls=urls,
+            min_content_chars=500,
+            timeout=20,
+            max_chars=30000,
+        )
 
-        if not pages:
-            print("Не удалось скачать текст ни с одного сайта.")
-            continue
-
-        print(f"Страниц до filter_pages: {len(pages)}")
-        pages = filter_pages(pages, question)
         print(f"Осталось страниц после filter_pages: {len(pages)}")
 
         if not pages:
-            print("После фильтрации страниц полезного контента не осталось.")
+            print("После локальной обработки страниц полезного контента не осталось.")
             continue
 
         print("\nОбработка текста")
@@ -85,8 +82,6 @@ def main():
                 question = new_q
 
     final_answer, used_urls = generate_final_answer(question, top_chunks)
-
-    save_used_pages(pages, used_urls)
 
     print("\n" + final_answer)
 

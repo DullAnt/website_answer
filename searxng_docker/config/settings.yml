@@ -1,0 +1,75 @@
+use_default_settings: true
+
+general:
+  debug: true
+  instance_name: "SearXNG"
+
+search:
+  safe_search: 0
+  autocomplete: ""
+  formats:
+    - html
+    - json
+
+server:
+  secret_key: "b9dcd6310e814a85b6cb7de26f58dfcd6259c697cbbe59afb1917e6e85819deb"
+  limiter: false
+  image_proxy: false
+  public_instance: false
+  base_url: http://127.0.0.1/searxng/
+
+valkey:
+  url: false
+
+outgoing:
+  request_timeout: 15.0
+  enable_http2: false
+
+# Когда будут понятны реальные движки, включишь keep_only:
+# use_default_settings:
+#   engines:
+#     keep_only:
+#       - newton
+#       - naumen
+
+# Шаблоны движков. Пока закомментированы, потому что формат ответов
+# и auth ещё не подтверждены.
+
+# engines:
+#   - name: newton
+#     engine: json_engine
+#     shortcut: ntn
+#     categories: general
+#     paging: true
+#     method: GET
+#     search_url: https://newton.psbank.ru/api/internal/search/resultByGroups?q={query}&page={pageno}&how=r
+#     disabled: false
+#     headers:
+#       Accept: application/json
+#       User-Agent: Mozilla/5.0
+#     results_query: results
+#     url_query: url
+#     title_query: title
+#     content_query: snippet
+
+#   - name: naumen
+#     engine: json_engine
+#     shortcut: nau
+#     categories: general
+#     paging: false
+#     method: POST
+#     search_url: https://kms.headoffice.psbank.local/api/search
+#     disabled: false
+#     headers:
+#       Content-Type: application/json
+#       Accept: application/json
+#       User-Agent: Mozilla/5.0
+#     request_body: >-
+#       {
+#         "query": "{query}",
+#         "limit": 10
+#       }
+#     results_query: results
+#     url_query: url
+#     title_query: title
+#     content_query: snippet
