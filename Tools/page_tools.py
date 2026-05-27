@@ -1,10 +1,14 @@
 from __future__ import annotations
 
+import json
+import os
 import re
 from urllib.parse import urlparse
 
 import requests
 from bs4 import BeautifulSoup
+
+from config.config import Config
 
 
 DEFAULT_HEADERS = {

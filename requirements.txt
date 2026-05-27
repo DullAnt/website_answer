@@ -1,9 +1,10 @@
-tavily-python
 fastapi
 uvicorn
 langchain-huggingface
-langchain-community 
 faiss-cpu
 sentence-transformers
 langchain-community
 langchain-ollama
+python-dotenv
+requests
+beautifulsoup4

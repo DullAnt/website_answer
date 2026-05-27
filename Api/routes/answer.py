@@ -24,12 +24,12 @@ def run_answer_pipeline(payload: AnswerRequest) -> dict:
         raise ValueError("Вопрос не может быть пустым.")
 
     search_engine = get_search_engine()
+    topics = generate_search_topics(question)
 
     print(f"\n[API] Вопрос: {question}")
     print(f"[API] Search engine: {search_engine.__class__.__name__}")
 
     print("\n[API] Генерация поисковых тем")
-    topics = generate_search_topics(question)
 
     print("[API] Сгенерированные темы:")
     for i, topic in enumerate(topics, start=1):

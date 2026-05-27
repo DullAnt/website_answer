@@ -30,7 +30,12 @@ def main():
             topics = [t.strip() for t in custom_topics.split(",") if t.strip()]
 
         print("\nИщем ссылки")
-        urls = search_engine.search(topics)
+        structured_pages = None
+        if hasattr(search_engine, "search_pages"):
+            structured_pages = search_engine.search_pages(topics)
+            urls = [page["url"] for page in structured_pages]
+        else:
+            urls = search_engine.search(topics)
         print(f"Найдено ссылок до фильтрации: {len(urls)}")
 
         urls = filter_urls(urls)
@@ -41,12 +46,19 @@ def main():
             continue
 
         print("\nЛокально извлекаем страницы")
-        pages = filter_pages(
-            pages_or_urls=urls,
-            min_content_chars=500,
-            timeout=20,
-            max_chars=30000,
-        )
+        if structured_pages is not None:
+            allowed_urls = {url.rstrip("/") for url in urls}
+            pages = filter_pages(
+                [page for page in structured_pages if page.get("url", "").rstrip("/") in allowed_urls],
+                min_content_chars=1,
+            )
+        else:
+            pages = filter_pages(
+                pages_or_urls=urls,
+                min_content_chars=500,
+                timeout=20,
+                max_chars=30000,
+            )
 
         print(f"Осталось страниц после filter_pages: {len(pages)}")
 
