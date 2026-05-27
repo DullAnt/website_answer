@@ -42,7 +42,7 @@ def main():
 
         print("\nЛокально извлекаем страницы")
         pages = filter_pages(
-            urls=urls,
+            pages_or_urls=urls,
             min_content_chars=500,
             timeout=20,
             max_chars=30000,

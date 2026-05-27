@@ -1,4 +1,6 @@
 tavily-python
+fastapi
+uvicorn
 langchain-huggingface
 langchain-community 
 faiss-cpu

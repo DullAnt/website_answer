@@ -1,3 +1,5 @@
+import os
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -37,3 +39,13 @@ app.include_router(health_router)
 app.include_router(search_router)
 app.include_router(extract_router)
 app.include_router(answer_router)
+
+if __name__ == "__main__":
+    import uvicorn
+
+    uvicorn.run(
+        "main_api:app",
+        host=os.getenv("API_HOST", "127.0.0.1"),
+        port=int(os.getenv("API_PORT", "8000")),
+        reload=os.getenv("API_RELOAD", "false").lower() in {"1", "true", "yes"},
+    )

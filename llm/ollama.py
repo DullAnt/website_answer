@@ -14,7 +14,7 @@ def _build_model() -> ChatOllama:
         model=Config.OLLAMA_MODEL,
         base_url=Config.OLLAMA_HOST,
         temperature=0.3,
-        num_predict=2048,
+        num_predict=4096,
     )
 
 
