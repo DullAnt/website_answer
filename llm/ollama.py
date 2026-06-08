@@ -10,13 +10,33 @@ from config.config import Config
 
 
 def _build_model() -> ChatOllama:
-    return ChatOllama(
-        model=Config.OLLAMA_MODEL,
-        base_url=Config.OLLAMA_HOST,
-        temperature=0.3,
-        num_predict=4096,
-        reasoning=Config.OLLAMA_REASONING,
-    )
+    model_kwargs = {
+        "model": Config.OLLAMA_MODEL,
+        "base_url": Config.OLLAMA_HOST,
+        "temperature": 0.3,
+        "num_predict": Config.OLLAMA_NUM_PREDICT,
+    }
+
+    if Config.OLLAMA_REASONING:
+        model_kwargs["reasoning"] = True
+
+    try:
+        return ChatOllama(**model_kwargs)
+    except Exception:
+        if "reasoning" not in model_kwargs:
+            raise
+        model_kwargs.pop("reasoning")
+        print("[Ollama] ChatOllama does not support reasoning=; running without it.")
+        return ChatOllama(**model_kwargs)
+
+
+def _strip_think(text: str) -> str:
+    text = str(text or "")
+    if not Config.OLLAMA_STRIP_THINK:
+        return text.strip()
+    text = re.sub(r"<think>.*?</think>", "", text, flags=re.DOTALL | re.IGNORECASE)
+    text = re.sub(r"<think>.*", "", text, flags=re.DOTALL | re.IGNORECASE)
+    return text.strip()
 
 
 def _build_context_text(chunks: list) -> str:
@@ -48,6 +68,7 @@ def _group_chunks_by_url(chunks: list) -> list[tuple[str, list]]:
 
     return list(grouped.items())
 
+
 def _extract_used_urls_from_answer(answer: str, chunks: list) -> list[str]:
     if not answer:
         return []
@@ -70,6 +91,7 @@ def _extract_used_urls_from_answer(answer: str, chunks: list) -> list[str]:
 
     return used_urls
 
+
 def _iter_batches(items: list, batch_size: int):
     batch_size = max(1, batch_size)
     for i in range(0, len(items), batch_size):
@@ -86,6 +108,7 @@ def generate_search_topics(question: str, topics_count: int = 5) -> list[str]:
         "question": question,
         "TOP_K": Config.TOP_K,
     })
+    raw_response = _strip_think(raw_response)
 
     topics = [t.strip() for t in raw_response.split("|||") if t.strip()]
 
@@ -117,6 +140,7 @@ def select_relevant_links(
         "candidate_links": links_as_text,
         "limit": limit,
     })
+    raw_response = _strip_think(raw_response)
 
     selected = [u.strip() for u in raw_response.split("|||") if u.strip()]
     selected = [u for u in selected if u in candidate_links]
@@ -143,7 +167,7 @@ def _generate_answer_from_context(question: str, context_text: str) -> str:
     ]
 
     response = model.invoke(messages)
-    return str(response.content).strip()
+    return _strip_think(response.content)
 
 
 def _refine_answer(question: str, previous_answer: str, context_text: str) -> str:
@@ -161,7 +185,7 @@ def _refine_answer(question: str, previous_answer: str, context_text: str) -> st
     ]
 
     response = model.invoke(messages)
-    return str(response.content).strip()
+    return _strip_think(response.content)
 
 
 def generate_final_answer(question: str, chunks: list):

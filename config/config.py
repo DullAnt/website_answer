@@ -13,11 +13,9 @@ LLM_ANSWER_PARSER_TYPE = Literal["none", "json", "string"]
 DEFAULT_OLLAMA_HOST = os.getenv("OLLAMA_HOST", "http://localhost:11434")
 DEFAULT_OLLAMA_TIMEOUT = int(os.getenv("OLLAMA_TIMEOUT", "600"))
 DEFAULT_OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "gemma3:2b")
-DEFAULT_OLLAMA_REASONING = os.getenv("OLLAMA_REASONING", "false").lower() in {
-    "1",
-    "true",
-    "yes",
-}
+DEFAULT_OLLAMA_NUM_PREDICT = int(os.getenv("OLLAMA_NUM_PREDICT", "2048"))
+DEFAULT_OLLAMA_REASONING = os.getenv("OLLAMA_REASONING", "false").lower() in {"1", "true", "yes"}
+DEFAULT_OLLAMA_STRIP_THINK = os.getenv("OLLAMA_STRIP_THINK", "true").lower() in {"1", "true", "yes"}
 
 # -------------------Device---------------------
 DEFAULT_DEVICE = os.getenv("DEVICE", "cuda")
@@ -70,8 +68,10 @@ class Config:
     #Ollama    
     OLLAMA_HOST = DEFAULT_OLLAMA_HOST
     OLLAMA_MODEL = DEFAULT_OLLAMA_MODEL
-    DEVICE = DEFAULT_DEVICE
+    OLLAMA_NUM_PREDICT = DEFAULT_OLLAMA_NUM_PREDICT
     OLLAMA_REASONING = DEFAULT_OLLAMA_REASONING
+    OLLAMA_STRIP_THINK = DEFAULT_OLLAMA_STRIP_THINK
+    DEVICE = DEFAULT_DEVICE
 
     # Embeddings
     EMBEDDING_MODEL = DEFAULT_EMBEDDING_MODEL
@@ -117,6 +117,9 @@ __all__ = [
     "DEFAULT_OLLAMA_MODEL",
     "DEFAULT_OLLAMA_HOST",
     "DEFAULT_OLLAMA_TIMEOUT",
+    "DEFAULT_OLLAMA_NUM_PREDICT",
+    "DEFAULT_OLLAMA_REASONING",
+    "DEFAULT_OLLAMA_STRIP_THINK",
     "DEFAULT_EMBEDDING_MODEL",
     "DEFAULT_TOP_K",
     "DEFAULT_N_URLS_FOR_TOPIC",
